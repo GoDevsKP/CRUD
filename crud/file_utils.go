@@ -1,4 +1,4 @@
-package my_database
+package crud
 
 import (
 	"io/ioutil"
@@ -8,14 +8,11 @@ import (
 	"fmt"
 )
 
-type MyDatabaseRepository struct {
-	filename string
-}
 
-func (databaseRepo *MyDatabaseRepository)load() map[int]Book {
+func LoadFromFile(filename string) map[int]Book {
 
 	var result map[int]Book
-	data, err := ioutil.ReadFile(databaseRepo.filename)
+	data, err := ioutil.ReadFile(filename)
 
 	if (err == nil) {
 		json.Unmarshal(data, &result)
@@ -25,8 +22,8 @@ func (databaseRepo *MyDatabaseRepository)load() map[int]Book {
 	return result
 }
 
-func (databaseRepo *MyDatabaseRepository)save(data map[int]Book) error {
-	fileHandle, _ := os.Create(databaseRepo.filename)
+func SaveToFile(filename string, data map[int]Book) error {
+	fileHandle, _ := os.Create(filename)
 	writer := bufio.NewWriter(fileHandle)
 	defer fileHandle.Close()
 	b, err := json.Marshal(data)

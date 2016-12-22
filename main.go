@@ -6,7 +6,7 @@ import (
 	"os"
 	"bufio"
 	"strings"
-	database "./my_database"
+	crud "./crud"
 )
 
 const (
@@ -25,8 +25,8 @@ func main() {
 	// Close the listener when the application closes.
 	defer l.Close()
 
-	dataStorage := database.MyDatabaseWrapper{}
-	dataStorage.Initialize()
+	dataStorage := crud.DB{}
+	dataStorage.Init()
 
 	fmt.Println("Listening on " + CONN_HOST + ":" + CONN_PORT)
 	for {
@@ -38,12 +38,11 @@ func main() {
 			fmt.Println("Error accepting: ", err.Error())
 			os.Exit(1)
 		}
-		// Handle connections in a new goroutine.
 		go handleConnection(conn, &dataStorage)
 	}
 }
 
-func handleConnection(conn net.Conn, dataStorage *database.MyDatabaseWrapper) {
+func handleConnection(conn net.Conn, dataStorage *crud.DB) {
 	for {
 		connbuf := bufio.NewReader(conn)
 		for {
@@ -56,12 +55,12 @@ func handleConnection(conn net.Conn, dataStorage *database.MyDatabaseWrapper) {
 	}
 }
 
-func handleRequest(input string, conn net.Conn, dataStorage *database.MyDatabaseWrapper) {
+func handleRequest(input string, conn net.Conn, dataStorage *crud.DB) {
 	query := strings.Fields(input)
 
-	if (!database.ValidateQuery(query)) {
-		conn.Write([]byte("Wrong format of query\n"))
+	if (!crud.Check(query)) {
+		conn.Write([]byte("Bad query\n"))
 	} else {
-		conn.Write([]byte(database.HandleQuery(query, dataStorage) + "\n" ))
+		conn.Write([]byte(crud.Handle(query, dataStorage) + "\n" ))
 	}
 }
